@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Button Click Counter</title>
+  </head>
+  <body>
+    <h1>Button Click Counter</h1>
+    <p>Click the button to increase the count:</p>
+    <button id="countButton">0</button>
+    <p>Count: <span id="count">0</span></p>
+    <button id="clearButton">Clear</button>
+    <ul id="historyList"></ul>
+    <h2>Top Scores:</h2>
+    <ol id="topScoresList"></ol>
+    <script>
+      const button = document.querySelector('#countButton');
+      const countElement = document.querySelector('#count');
+      const clearButton = document.querySelector('#clearButton');
+      const historyList = document.querySelector('#historyList');
+      const topScoresList = document.querySelector('#topScoresList');
+      let count = Number(localStorage.getItem('count') || 0);
+      countElement.innerText = count;
+      let scores = JSON.parse(localStorage.getItem('scores') || '[]');
+      let user = prompt('What is your name?');
+      let currentUserScore = 0;
+      button.addEventListener('click', () => {
+        count++;
+        button.innerText = count;
+        countElement.innerText = count;
+        localStorage.setItem('count', count);
+        currentUserScore = count;
+      });
+      clearButton.addEventListener('click', () => {
+        localStorage.removeItem('count');
+        count = 0;
+        button.innerText = count;
+        countElement.innerText = count;
+        historyList.innerHTML = '';
+        localStorage.removeItem('scores');
+        topScoresList.innerHTML = '';
+        scores = [];
+      });
+      setInterval(() => {
+        scores.push({ user, score: currentUserScore });
+        localStorage.setItem('scores', JSON.stringify(scores));
+        const sortedScores = scores.sort((a, b) => b.score - a.score);
+        topScoresList.innerHTML = '';
+        for (let i = 0; i < Math.min(10, sortedScores.length); i++) {
+          const item = document.createElement('li');
+          item.innerText = `${i + 1}. ${sortedScores[i].user}: ${sortedScores[i].score}`;
+          topScoresList.appendChild(item);
+        }
+      }, 10000);
+
+      document.addEventListener('keydown', (event) => {
+        if (event.shiftKey && event.code === 'F6') {
+          localStorage.removeItem('scores');
+          topScoresList.innerHTML = '';
+          scores = [];
+        }
+      });
+    </script>
+  </body>
+</html>
